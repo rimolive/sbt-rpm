@@ -2,11 +2,11 @@
 # bootstrap exception is here:  https://fedorahosted.org/fpc/ticket/389
 # meeting minutes with vote are here:  http://meetbot.fedoraproject.org/fedora-meeting-1/2014-02-13/fpc.2014-02-13-17.00.html
 
-%global do_bootstrap 1
+%global do_bootstrap 0
 
 # build non-bootstrap packages with tests, cross-referenced sources, etc
 %global do_proper 0
-%global pkg_rel 2
+%global pkg_rel 4
 %global scala_version 2.10.3
 %global scala_short_version 2.10
 %global sbt_bootstrap_version 0.13.1
@@ -307,6 +307,7 @@ Source183:	%sbt_ivy_descriptor precompiled-2_9_2
 Source84:	http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/precompiled-2_9_3/%{sbt_bootstrap_version}/jars/compiler-interface-bin.jar#/compiler-interface-bin-2_9_3.jar
 
 Source184:	%sbt_ivy_descriptor precompiled-2_9_3
+
 
 %endif
 
@@ -710,6 +711,13 @@ done
 %doc README.md LICENSE NOTICE
 
 %changelog
+* Thu Jan 30 2014 William Benton <willb@redhat.com> - 0.13.1-4
+- use native test-interface and sbinary packages in both bootstrap and non-bootstrap modes
+- fix a bug that was crashing on rawhide
+
+* Mon Jan 20 2014 William Benton <willb@redhat.com> - 0.13.1-3
+- builds as non-bootstrap package
+- numerous other minor fixes
 
 * Wed Jan 15 2014 William Benton <willb@redhat.com> - 0.13.1-2
 - use generated Ivy files
