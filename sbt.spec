@@ -6,7 +6,7 @@
 
 # build non-bootstrap packages with tests, cross-referenced sources, etc
 %global do_proper 0
-%global pkg_rel 5
+%global pkg_rel 6
 %global scala_version 2.10.3
 %global scala_short_version 2.10
 %global sbt_bootstrap_version 0.13.1
@@ -49,7 +49,7 @@
 
 Name:		sbt
 Version:	%{sbt_version}
-Release:	%{pkg_rel}%{?dist}.1
+Release:	%{pkg_rel}%{?dist}
 Summary:	The simple build tool for Scala and Java projects
 
 BuildArch:	noarch
@@ -720,6 +720,9 @@ done
 %doc README.md LICENSE NOTICE
 
 %changelog
+* Wed Apr 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> 0.13.1-6
+- Rebuild to fix dangling jansi-native and hawtjni-runtime symlinks
+
 * Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13.1-5.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
