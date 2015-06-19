@@ -49,7 +49,7 @@
 
 Name:		sbt
 Version:	%{sbt_version}
-Release:	%{pkg_rel}%{?dist}
+Release:	%{pkg_rel}%{?dist}.1
 Summary:	The simple build tool for Scala and Java projects
 
 BuildArch:	noarch
@@ -720,6 +720,9 @@ done
 %doc README.md LICENSE NOTICE
 
 %changelog
+* Fri Jun 19 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13.1-6.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Wed Apr 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> 0.13.1-6
 - Rebuild to fix dangling jansi-native and hawtjni-runtime symlinks
 
