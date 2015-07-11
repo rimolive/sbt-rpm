@@ -2,12 +2,12 @@
 # bootstrap exception is here:  https://fedorahosted.org/fpc/ticket/389
 # meeting minutes with vote are here:  http://meetbot.fedoraproject.org/fedora-meeting-1/2014-02-13/fpc.2014-02-13-17.00.html
 
-%global do_bootstrap 0
+%global do_bootstrap 1
 
 # build non-bootstrap packages with tests, cross-referenced sources, etc
 %global do_proper 0
-%global pkg_rel 6
-%global scala_version 2.10.3
+%global pkg_rel 7
+%global scala_version 2.10.4
 %global scala_short_version 2.10
 %global sbt_bootstrap_version 0.13.1
 %global sbt_major 0
@@ -49,13 +49,10 @@
 
 Name:		sbt
 Version:	%{sbt_version}
-Release:	%{pkg_rel}%{?dist}.1
+Release:	%{pkg_rel}%{?dist}
 Summary:	The simple build tool for Scala and Java projects
 
 BuildArch:	noarch
-
-# builds don't work on our ARM builders atm due to memory constraints
-ExcludeArch:	%{arm}
 
 License:	BSD
 URL:	http://www.scala-sbt.org
@@ -412,9 +409,6 @@ for props in rpmbuild-sbt.boot.properties sbt.boot.properties ; do
     sed -i -e 's/FEDORA_SBT_VERSION/%{sbt_version}/g' $props
 done
 
-sed -i -e 's/["]2[.]10[.]2["]/\"2.10.3\"/g' $(find . -name \*.sbt) $(find . -name \*.xml)
-sed -i -e 's/["]2[.]10[.]2-RC2["]/\"2.10.3\"/g' $(find . -name \*.sbt)
-
 sed -i -e 's/0.13.0/%{sbt_bootstrap_version}/g' project/build.properties
 
 ######################################################################
@@ -438,7 +432,7 @@ sed -i -e 's/0.13.0/%{sbt_bootstrap_version}/g' project/build.properties
 # fake on F19
 %if 0%{?fedora} >= 21
 ./climbing-nemesis.py jline jline %{ivy_local_dir} --version 2.11
-./climbing-nemesis.py org.fusesource.jansi jansi %{ivy_local_dir} --version 1.9
+./climbing-nemesis.py org.fusesource.jansi jansi %{ivy_local_dir} --version 1.11
 ./climbing-nemesis.py org.fusesource.jansi jansi-native %{ivy_local_dir} --version 1.5
 ./climbing-nemesis.py org.fusesource.hawtjni hawtjni-runtime %{ivy_local_dir} --version 1.8
 %else
@@ -578,7 +572,7 @@ done
 %endif
 
 # remove any references to Scala 2.10.2
-sed -i -e 's/["]2[.]10[.]2["]/\"2.10.3\"/g' $(find . -name \*.xml)
+sed -i -e 's/["]2[.]10[.][23]["]/\"2.10.4\"/g' $(find . -name \*.xml)
 
 # better not to try and compile the docs project
 rm -f project/Docs.scala
@@ -603,6 +597,13 @@ mkdir -p scala/lib
 for jar in %{_javadir}/scala/*.jar ; do
    cp --symbolic-link $jar scala/lib
 done
+
+sed -i -e 's/["]2[.]10[.][23]["]/\"2.10.4\"/g' $(find . -name \*.sbt) $(find . -name \*.xml) $(find . -name \*.scala)
+sed -i -e 's/["]2[.]10[.]2-RC2["]/\"2.10.4\"/g' $(find . -name \*.sbt)
+
+# work around proguard bugs with the Scala library
+sed -i -e 's/"-dontnote",/"-dontnote", "-dontshrink", "-dontoptimize",/g' project/Proguard.scala
+sed -i -e 's/mapLibraryJars.all filterNot in[.]toSet./mapLibraryJars(all.map {f => new java.io.File(f.getCanonicalPath())} filterNot in.map {f => new java.io.File(f.getCanonicalPath())}.toSet)/g' project/Proguard.scala
 
 %build
 
@@ -720,6 +721,11 @@ done
 %doc README.md LICENSE NOTICE
 
 %changelog
+* Fri Jul 10 2015 William Benton <willb@redhat.com> - 0.13.1-7
+- bootstrap build
+- fixes for Proguard
+- don't ExcludeArch ARM
+
 * Fri Jun 19 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.13.1-6.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
