@@ -598,8 +598,8 @@ for jar in %{_javadir}/scala/*.jar ; do
    cp --symbolic-link $jar scala/lib
 done
 
-sed -i -e 's/["]2[.]10[.][23]["]/\"2.10.4\"/g' $(find . -name \*.sbt) $(find . -name \*.xml) $(find . -name \*.scala)
-sed -i -e 's/["]2[.]10[.]2-RC2["]/\"2.10.4\"/g' $(find . -name \*.sbt)
+sed -i -e 's/["]2[.]10[.][23]["]/\"2.10.4\"/g' $(find . -name \*.sbt -type f) $(find . -name \*.xml) $(find . -name \*.scala)
+sed -i -e 's/["]2[.]10[.]2-RC2["]/\"2.10.4\"/g' $(find . -name \*.sbt -type f)
 
 # work around proguard bugs with the Scala library
 sed -i -e 's/"-dontnote",/"-dontnote", "-dontshrink", "-dontoptimize",/g' project/Proguard.scala
