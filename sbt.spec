@@ -63,6 +63,7 @@ Patch1:	sbt-0.13.1-RC3-release-scala.patch
 Patch2:	sbt-0.13.1-ivy-2.3.0.patch
 Patch3:	sbt-0.13.1-ivy-docs.patch
 Patch4:		sbt-0.13.1-sxr.patch
+Patch5:	sbt-0.13.1-ivy-2.4.0.patch
 
 # sbt-ghpages plugin
 Source1:	https://github.com/sbt/sbt-ghpages/archive/v%{sbt_ghpages_version}.tar.gz
@@ -385,6 +386,8 @@ sbt is the simple build tool for Scala and Java projects.
 %patch4 -p1
 %endif
 
+%patch5
+
 sed -i -e '/% "test"/d' project/Util.scala
 
 cp %{SOURCE16} .
@@ -530,7 +533,7 @@ sed -i -e '/precompiled/d' org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
 %endif
 
 # test-interface
-./climbing-nemesis.py org.scala-sbt test-interface %{ivy_local_dir}
+./climbing-nemesis.py org.scala-sbt test-interface %{ivy_local_dir} --version 1.0
 
 # sbinary
 ./climbing-nemesis.py org.scala-tools.sbinary sbinary_%{scala_short_version} %{ivy_local_dir} # --scala %{scala_short_version}
@@ -564,7 +567,7 @@ done
 ./climbing-nemesis.py --jarfile %{_javadir}/%{name}/compiler-interface-bin.jar --ivyfile %{installed_ivy_local}/org.scala-sbt/compiler-interface/%{sbt_bootstrap_version}/ivy.xml org.scala-sbt compiler-interface-bin %{ivy_local_dir} --version %{sbt_bootstrap_version} --override org.scala-sbt:compiler-interface --override-dir-only
 
 # test-interface
-./climbing-nemesis.py org.scala-sbt test-interface %{ivy_local_dir}
+./climbing-nemesis.py org.scala-sbt test-interface %{ivy_local_dir} --version 1.0
 
 # sbinary
 ./climbing-nemesis.py org.scala-tools.sbinary sbinary_%{scala_short_version} %{ivy_local_dir} # --scala %{scala_short_version}
@@ -610,8 +613,8 @@ sed -i -e 's/mapLibraryJars.all filterNot in[.]toSet./mapLibraryJars(all.map {f 
 %if %{do_bootstrap}
 java -Xms512M -Xmx1536M -Xss1M -XX:+CMSClassUnloadingEnabled -jar -Dfedora.sbt.ivy.dir=ivy-local -Dfedora.sbt.boot.dir=sbt-boot-dir -Divy.checksums='""' -Dsbt.boot.properties=rpmbuild-sbt.boot.properties sbt-launch.jar package "set publishTo in Global := Some(Resolver.file(\"published\", file(\"published\"))(Resolver.ivyStylePatterns) ivys \"$(pwd)/published/[organization]/[module]/[revision]/ivy.xml\" artifacts \"$(pwd)/published/[organization]/[module]/[revision]/[artifact]-[revision].[ext]\")" publish makePom
 %else
-export SBT_IVY_DIR=ivy-local
-export SBT_BOOT_DIR=sbt-boot-dir
+export SBT_IVY_DIR=$PWD/ivy-local
+export SBT_BOOT_DIR=$PWD/sbt-boot-dir
 export SBT_BOOT_PROPERTIES=rpmbuild-sbt.boot.properties
 sbt package "set publishTo in Global := Some(Resolver.file(\"published\", file(\"published\"))(Resolver.ivyStylePatterns) ivys \"$(pwd)/published/[organization]/[module]/[revision]/ivy.xml\" artifacts \"$(pwd)/published/[organization]/[module]/[revision]/[artifact]-[revision].[ext]\")" publish makePom
 %endif
@@ -721,6 +724,10 @@ done
 %doc README.md LICENSE NOTICE
 
 %changelog
+* Tue Jul 21 2015 Mikolaj Izdebski <mizdebsk@redhat.com> - 0.13.1-7
+- Port to Ivy 2.4.0
+- Fix compatibility with XMvn 2.4.0
+
 * Fri Jul 10 2015 William Benton <willb@redhat.com> - 0.13.1-7
 - bootstrap build
 - fixes for Proguard
