@@ -2,11 +2,11 @@
 # bootstrap exception is here:  https://fedorahosted.org/fpc/ticket/389
 # meeting minutes with vote are here:  http://meetbot.fedoraproject.org/fedora-meeting-1/2014-02-13/fpc.2014-02-13-17.00.html
 
-%global do_bootstrap 1
+%global do_bootstrap 0
 
 # build non-bootstrap packages with tests, cross-referenced sources, etc
 %global do_proper 0
-%global pkg_rel 7
+%global pkg_rel 8
 %global scala_version 2.10.4
 %global scala_short_version 2.10
 %global sbt_bootstrap_version 0.13.1
@@ -724,6 +724,9 @@ done
 %doc README.md LICENSE NOTICE
 
 %changelog
+* Tue Jul 21 2015 Mikolaj Izdebski <mizdebsk@redhat.com> - 0.13.1-8
+- Non-bootstrap build
+
 * Tue Jul 21 2015 Mikolaj Izdebski <mizdebsk@redhat.com> - 0.13.1-7
 - Port to Ivy 2.4.0
 - Fix compatibility with XMvn 2.4.0
