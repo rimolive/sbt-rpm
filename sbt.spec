@@ -49,7 +49,7 @@
 
 Name:		sbt
 Version:	%{sbt_version}
-Release:	%{pkg_rel}%{?dist}.2
+Release:	%{pkg_rel}%{?dist}.3
 Summary:	The simple build tool for Scala and Java projects
 
 BuildArch:	noarch
@@ -724,6 +724,9 @@ done
 %doc README.md LICENSE NOTICE
 
 %changelog
+* Thu Jul 27 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.13.1-8.3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.13.1-8.2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
