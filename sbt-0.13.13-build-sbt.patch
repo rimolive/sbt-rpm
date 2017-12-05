@@ -1,0 +1,144 @@
+diff --git a/build.sbt b/build.sbt
+index c13379426..eaa9105d6 100644
+--- a/build.sbt
++++ b/build.sbt
+@@ -7,14 +7,11 @@ import Sxr.sxr
+ // but can be shared across the multi projects.
+ def buildLevelSettings: Seq[Setting[_]] = inThisBuild(Seq(
+   organization := "org.scala-sbt",
+-  version := "0.13.13",
+-  bintrayOrganization := Some(if (publishStatus.value == "releases") "typesafe" else "sbt"),
+-  bintrayRepository := s"ivy-${publishStatus.value}",
+-  bintrayPackage := "sbt",
+-  bintrayReleaseOnPublish := false
++  version := "0.13.13"
+ ))
+ 
+ def commonSettings: Seq[Setting[_]] = Seq(
++  scalacOptions := Seq("-Ylog-classpath"),
+   scalaVersion := scala210,
+   publishArtifact in packageDoc := false,
+   publishMavenStyle := false,
+@@ -26,37 +23,18 @@ def commonSettings: Seq[Setting[_]] = Seq(
+   testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-w", "1"),
+   javacOptions in compile ++= Seq("-target", "6", "-source", "6", "-Xlint", "-Xlint:-serial"),
+   incOptions := incOptions.value.withNameHashing(true),
+-  crossScalaVersions := Seq(scala210),
+-  bintrayPackage := (bintrayPackage in ThisBuild).value,
+-  bintrayRepository := (bintrayRepository in ThisBuild).value,
+-  test in assembly := {},
+-  assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = true),
+-  assemblyMergeStrategy in assembly := {
+-    case PathList(ps @ _*) if ps.last == "javax.inject.Named"      => MergeStrategy.first
+-    case PathList(ps @ _*) if ps.last endsWith ".class"            => MergeStrategy.first
+-    case PathList(ps @ _*) if ps.last endsWith "module.properties" => MergeStrategy.first
+-    case PathList(ps @ _*) if ps.last == "MANIFEST.MF"             => MergeStrategy.rename
+-    case "LICENSE"                                                 => MergeStrategy.first
+-    case "NOTICE"                                                  => MergeStrategy.first
+-    // excluded from fat jar because otherwise we may pick it up when determining the `actualVersion`
+-    // of other scala instances.
+-    case "compiler.properties"                                     => MergeStrategy.discard
+-
+-    case x =>
+-      val oldStrategy = (assemblyMergeStrategy in assembly).value
+-      oldStrategy(x)
+-  }
++  crossScalaVersions := Seq(scala210)
+ )
+ 
+ def minimalSettings: Seq[Setting[_]] =
+   commonSettings ++ customCommands ++
+-  publishPomSettings ++ Release.javaVersionCheckSettings
++  publishPomSettings
+ 
+ def baseSettings: Seq[Setting[_]] =
+-  minimalSettings ++ Seq(projectComponent) ++ baseScalacOptions ++ Licensed.settings ++ Formatting.settings
++  minimalSettings ++ Seq(projectComponent) ++ baseScalacOptions ++ Licensed.settings
+ 
+ def testedBaseSettings: Seq[Setting[_]] =
+-  baseSettings ++ testDependencies
++  baseSettings
+ 
+ 
+ val altLocalRepoName = "alternative-local"
+@@ -99,8 +77,7 @@ lazy val bundledLauncherProj =
+   (project in file("launch")).
+   settings(
+     minimalSettings,
+-    inConfig(Compile)(Transform.configSettings),
+-    Release.launcherSettings(sbtLaunchJar)
++    inConfig(Compile)(Transform.configSettings)
+   ).
+   enablePlugins(SbtLauncherPlugin).
+   settings(
+@@ -109,8 +86,8 @@ lazy val bundledLauncherProj =
+     description := "sbt application launcher",
+     publishArtifact in packageSrc := false,
+     autoScalaLibrary := false,
+-    publish := Release.deployLauncher.value,
+-    publishLauncher := Release.deployLauncher.value,
++    publish := {},
++    publishLauncher := {},
+     packageBin in Compile := sbtLaunchJar.value
+   )
+ 
+@@ -445,6 +422,23 @@ lazy val actionsProj = (project in mainPath / "actions").
+     name := "Actions"
+   )
+ 
++// Launcher interface
++lazy val launcherInterfaceProj = (project in file("launcher-interface")).
++  dependsOn (interfaceProj, ioProj, ivyProj).
++  settings(
++    testedBaseSettings,
++    name := "Launcher Interface"
++  )
++
++
++// Launcher implementation
++lazy val launcherImplProj = (project in file("launcher-implementation")).
++  dependsOn(interfaceProj, ioProj, ivyProj, launcherInterfaceProj).
++  settings(
++    testedBaseSettings,
++    name := "Launcher Implementation"
++  )
++
+ // General command support and core commands not specific to a build system
+ lazy val commandProj = (project in mainPath / "command").
+   dependsOn(interfaceProj, ioProj, logProj, completeProj, classpathProj, crossProj, ivyProj).
+@@ -525,13 +519,13 @@ def allProjects = Seq(interfaceProj, apiProj,
+   compileInterfaceProj, compileIncrementalProj, compilePersistProj, compilerProj,
+   compilerIntegrationProj, compilerIvyProj,
+   scriptedBaseProj, scriptedSbtProj, scriptedPluginProj,
+-  actionsProj, commandProj, mainSettingsProj, mainProj, sbtProj, bundledLauncherProj, mavenResolverPluginProj)
++  actionsProj, commandProj, mainSettingsProj, mainProj, sbtProj, mavenResolverPluginProj, launcherInterfaceProj, launcherImplProj)
+ 
+ def projectsWithMyProvided = allProjects.map(p => p.copy(configurations = (p.configurations.filter(_ != Provided)) :+ myProvided))
+ lazy val nonRoots = projectsWithMyProvided.map(p => LocalProject(p.id))
+ 
+ def rootSettings = fullDocSettings ++
+-  Util.publishPomSettings ++ otherRootSettings ++ Formatting.sbtFilesSettings ++
++  Util.publishPomSettings ++ otherRootSettings ++ 
+   Transform.conscriptSettings(bundledLauncherProj)
+ def otherRootSettings = Seq(
+   Scripted.scriptedPrescripted := { addSbtAlternateResolver _ },
+@@ -541,8 +535,8 @@ def otherRootSettings = Seq(
+   Scripted.scriptedSource := (sourceDirectory in sbtProj).value / "sbt-test",
+   publishAll := {
+     val _ = (publishLocal).all(ScopeFilter(inAnyProject)).value
+-  },
+-  aggregate in bintrayRelease := false
++  }
++  //aggregate in bintrayRelease := false
+ ) ++ inConfig(Scripted.MavenResolverPluginTest)(Seq(
+   Scripted.scriptedLaunchOpts := List("-XX:MaxPermSize=256M", "-Xmx1G"),
+   Scripted.scripted <<= scriptedTask,
+@@ -587,7 +581,7 @@ lazy val docProjects: ScopeFilter = ScopeFilter(
+   inAnyProject -- inProjects(sbtRoot, sbtProj, scriptedBaseProj, scriptedSbtProj, scriptedPluginProj, mavenResolverPluginProj),
+   inConfigurations(Compile)
+ )
+-def fullDocSettings = Util.baseScalacOptions ++ Docs.settings ++ Sxr.settings ++ Seq(
++def fullDocSettings = Util.baseScalacOptions ++ Sxr.settings ++ Seq(
+   scalacOptions += "-Ymacro-no-expand", // for both sxr and doc
+   sources in sxr := {
+     val allSources = (sources ?? Nil).all(docProjects).value

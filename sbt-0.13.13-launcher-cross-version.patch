@@ -1,0 +1,42 @@
+diff --git a/launcher-implementation/src/main/scala/xsbt/boot/ConfigurationParser.scala b/launcher-implementation/src/main/scala/xsbt/boot/ConfigurationParser.scala
+index 9e4fc54..6149568 100644
+--- a/launcher-implementation/src/main/scala/xsbt/boot/ConfigurationParser.scala
++++ b/launcher-implementation/src/main/scala/xsbt/boot/ConfigurationParser.scala
+@@ -167,7 +167,7 @@ class ConfigurationParser {
+       val (rev, m3) = getVersion(m2, name + " version", name + ".version")
+       val (main, m4) = id(m3, "class", "xsbt.Main")
+       val (components, m5) = ids(m4, "components", List("default"))
+-      val (crossVersioned, m6) = id(m5, "cross-versioned", CrossVersionUtil.binaryString)
++      val (crossVersioned, m6) = id(m5, "cross-versioned", "2.10.6")
+       val (resources, m7) = ids(m6, "resources", Nil)
+       val (classifiers, m8) = getClassifiers(m7, "Application classifiers")
+       check(m8, "label")
+diff --git a/launcher-implementation/src/main/scala/xsbt/boot/LaunchConfiguration.scala b/launcher-implementation/src/main/scala/xsbt/boot/LaunchConfiguration.scala
+index f7fce64..ebebf74 100644
+--- a/launcher-implementation/src/main/scala/xsbt/boot/LaunchConfiguration.scala
++++ b/launcher-implementation/src/main/scala/xsbt/boot/LaunchConfiguration.scala
+@@ -68,10 +68,7 @@ object Classifiers {
+ object LaunchCrossVersion {
+   def apply(s: String): xsbti.CrossValue =
+     s match {
+-      case x if CrossVersionUtil.isFull(s)     => xsbti.CrossValue.Full
+-      case x if CrossVersionUtil.isBinary(s)   => xsbti.CrossValue.Binary
+-      case x if CrossVersionUtil.isDisabled(s) => xsbti.CrossValue.Disabled
+-      case x                                   => Pre.error("Unknown value '" + x + "' for property 'cross-versioned'")
++      case x => xsbti.CrossValue.Disabled
+     }
+ }
+ 
+diff --git a/launcher-implementation/src/main/scala/xsbt/boot/Update.scala b/launcher-implementation/src/main/scala/xsbt/boot/Update.scala
+index 14df30c..776b7b2 100644
+--- a/launcher-implementation/src/main/scala/xsbt/boot/Update.scala
++++ b/launcher-implementation/src/main/scala/xsbt/boot/Update.scala
+@@ -137,7 +137,7 @@ final class Update(config: UpdateConfiguration) {
+           val app = u.id
+           val resolvedName = (app.crossVersioned, scalaVersion) match {
+             case (xsbti.CrossValue.Full, Some(sv))   => app.name + "_" + sv
+-            case (xsbti.CrossValue.Binary, Some(sv)) => app.name + "_" + CrossVersionUtil.binaryScalaVersion(sv)
++            case (xsbti.CrossValue.Binary, Some(sv)) => app.name + "_" + "2.10.6"
+             case _                                   => app.name
+           }
+           val ddesc = addDependency(moduleID, app.groupID, resolvedName, app.getVersion, "default(compile)", u.classifiers)
