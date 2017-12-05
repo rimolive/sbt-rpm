@@ -2,7 +2,7 @@
 # bootstrap exception is here:  https://fedorahosted.org/fpc/ticket/389
 # meeting minutes with vote are here:  http://meetbot.fedoraproject.org/fedora-meeting-1/2014-02-13/fpc.2014-02-13-17.00.html
 
-%global do_bootstrap 0
+%global do_bootstrap 1
 
 # build non-bootstrap packages with tests, cross-referenced sources, etc
 %global do_proper 0
@@ -54,7 +54,7 @@
 %global testinterface_version 1.0
 %global dispatch_http_version 0.8.9
 
-%global want_sxr 0
+%global want_sxr 1
 %global want_specs2 1
 %global want_scalacheck 1
 %global want_dispatch_http 1
@@ -85,13 +85,12 @@ Source3:	https://github.com/sbt/sbt-site/archive/%{sbt_site_version}.tar.gz
 
 # sxr
 Source4:	https://github.com/harrah/browse/archive/v%{sxr_version}.tar.gz
-%endif
+%endif # do_proper
 
 # scalacheck
-# nb:  no "v" in this tarball URL
-#if %{?want_scalacheck}
-#Source6:	https://github.com/rickynils/scalacheck/archive/%{scalacheck_version}.tar.gz
-#%endif
+%if %{?want_scalacheck}
+Source6:	http://oss.sonatype.org/content/repositories/releases/org/scalacheck/scalacheck_%{scala_short_version}/%{scalacheck_version}/scalacheck_%{scala_short_version}-%{scalacheck_version}.jar
+%endif # want_scalacheck
 
 # specs 
 # nb:  no "v" in this tarball url
@@ -139,10 +138,6 @@ Source155:	%sbt_ivy_descriptor compiler-integration
 Source70:	%sbt_ivy_artifact io 
 Source170:	%sbt_ivy_descriptor io
 Source1700:	%generic_ivy_descriptor %typesafe_repo org.scala-sbt io %sbt_version io %sbt_version
-
-#%global generic_ivy_descriptor() %{1}/%{2}/%{3}/%{4}/ivys/ivy.xml#/%{5}-%{4}-ivy.xml
-#%global sbt_ivy_artifact() %{typesafe_repo}/org.scala-sbt/%{1}/%{sbt_bootstrap_version}/jars/%{1}.jar
-#%global sbt_ivy_descriptor() %{typesafe_repo}/org.scala-sbt/%{1}/%{sbt_bootstrap_version}/ivys/ivy.xml#/%{1}-%{sbt_bootstrap_version}-ivy.xml
 
 Source61:	%sbt_ivy_artifact process 
 Source161:	%sbt_ivy_descriptor process
@@ -221,10 +216,6 @@ Source1440:	%generic_ivy_descriptor %typesafe_repo org.scala-sbt collections %sb
 Source89:       https://repo1.maven.org/maven2/org/scala-lang/modules/scala-pickling_2.10/0.10.1/scala-pickling_2.10-0.10.1.jar
 Source189:      scala-pickling_%{scala_short_version}-%{scala_pickling_version}-ivy.xml
 
-# scalacheck
-%if %{?want_scalacheck}
-Source78:	http://oss.sonatype.org/content/repositories/releases/org/scalacheck/scalacheck_%{scala_short_version}/%{scalacheck_version}/scalacheck_%{scala_short_version}-%{scalacheck_version}.jar
-%endif
 
 %if %{?want_specs2}
 # specs
@@ -461,7 +452,6 @@ sed -i -e '/precompiled/d' org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
 ./climbing-nemesis.py --jarfile %{SOURCE37} --ivyfile %{SOURCE137} org.scala-sbt command %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE40} --ivyfile %{SOURCE140} org.scala-sbt run %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE41} --ivyfile %{SOURCE141} org.scala-sbt compiler-ivy-integration %{ivy_local_dir} --version %{sbt_bootstrap_version}
-./climbing-nemesis.py --jarfile %{SOURCE49} --ivyfile %{SOURCE149} org.scala-sbt apply-macro %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE55} --ivyfile %{SOURCE155} org.scala-sbt compiler-integration %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE56} --ivyfile %{SOURCE156} org.scala-sbt api %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE58} --ivyfile %{SOURCE158} org.scala-sbt classpath %{ivy_local_dir} --version %{sbt_bootstrap_version}
@@ -512,7 +502,7 @@ sed -i -e '/precompiled/d' org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
 
 ./climbing-nemesis.py junit junit %{ivy_local_dir} --version 4.11 --jarfile %{_javadir}/junit.jar
 ./climbing-nemesis.py org.hamcrest hamcrest-core %{ivy_local_dir} --version 1.3 --jarfile %{_javadir}/hamcrest/core.jar
-./climbing-nemesis.py org.specs2 specs2_2.10 %{ivy_local_dir} --version 2.3.11 --jarfile %{SOURCE78}
+./climbing-nemesis.py org.specs2 specs2_2.10 %{ivy_local_dir} --version 2.3.11 --jarfile %{SOURCE7}
 ./climbing-nemesis.py org.scala-sbt launcher-interface %{ivy_local_dir} --version %{sbt_launcher_version} --jarfile %{_sourcedir}/launcher-interface-%{sbt_launcher_version}.jar
 
 
@@ -521,11 +511,12 @@ sed -i -e '/precompiled/d' org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
 ./climbing-nemesis.py org.scalamacros quasiquotes_2.10 %{ivy_local_dir} --version 2.0.1 --jarfile %{SOURCE98} --ivyfile %{SOURCE198}
 
 # scalacheck
-./climbing-nemesis.py --jarfile %{SOURCE78} org.scalacheck scalacheck %{ivy_local_dir} --version %{scalacheck_version} --scala %{scala_short_version}
+./climbing-nemesis.py --jarfile %{SOURCE6} org.scalacheck scalacheck %{ivy_local_dir} --version %{scalacheck_version} --scala %{scala_short_version}
 
 ./climbing-nemesis.py --jarfile %{SOURCE97} --ivyfile %{SOURCE197} org.scala-sbt template-resolver %{ivy_local_dir} --version %{template_resolver_version}
 
 %if %{do_bootstrap}
+./climbing-nemesis.py --jarfile %{SOURCE49} --ivyfile %{SOURCE149} org.scala-sbt apply-macro %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE51} --ivyfile %{SOURCE151} org.scala-sbt interface %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE70} --ivyfile %{SOURCE170} org.scala-sbt io %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py com.jcraft jsch %{ivy_local_dir} --version 0.1.46 --jarfile %{_sourcedir}/jsch-0.1.46.jar
@@ -554,9 +545,9 @@ sed -i -e '/precompiled/d' org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
 
 %if %{?want_sxr}
 ./climbing-nemesis.py --jarfile %{SOURCE77} --ivyfile %{SOURCE450} org.scala-sbt.sxr sxr_2.10 %{ivy_local_dir} --version %{sxr_version}
-%endif
+%endif # want_sxr
 
-%endif
+%endif # do_bootstrap
 
 %if %{do_proper}
 ./climbing-nemesis.py --jarfile %{SOURCE74} --ivyfile %{SOURCE174} com.typesafe.sbt sbt-ghpages %{ivy_local_dir} --version %{sbt_ghpages_version}
