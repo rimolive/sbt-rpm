@@ -63,41 +63,35 @@ Name:		sbt
 Version:	%{sbt_version}
 Release:	%{pkg_rel}%{?dist}.2
 Summary:	The simple build tool for Scala and Java projects
-
 BuildArch:	noarch
-
 License:	BSD
 URL:	    http://www.scala-sbt.org
+Patch0:     sbt-0.13.13-build-sbt.patch
+Patch1:     sbt-0.13.13-launcher-cross-version.patch 
+
 Source0:	https://github.com/sbt/sbt/archive/v%{version}%{sbt_build}.tar.gz
 
-Patch0:	sbt-0.13.13-build-sbt.patch
-Patch1:	sbt-0.13.13-launcher-cross-version.patch 
 
 %if %{do_proper}
 # sbt-ghpages plugin
 Source1:	https://github.com/sbt/sbt-ghpages/archive/v%{sbt_ghpages_version}.tar.gz
-
 # sbt-git plugin
 Source2:	https://github.com/sbt/sbt-git/archive/v%{sbt_git_version}.tar.gz
-
 # sbt-site plugin
 Source3:	https://github.com/sbt/sbt-site/archive/%{sbt_site_version}.tar.gz
-
-# sxr
-Source4:	https://github.com/harrah/browse/archive/v%{sxr_version}.tar.gz
 %endif # do_proper
 
 # scalacheck
 %if %{?want_scalacheck}
-Source6:	http://oss.sonatype.org/content/repositories/releases/org/scalacheck/scalacheck_%{scala_short_version}/%{scalacheck_version}/scalacheck_%{scala_short_version}-%{scalacheck_version}.jar
+Source4:	http://oss.sonatype.org/content/repositories/releases/org/scalacheck/scalacheck_%{scala_short_version}/%{scalacheck_version}/scalacheck_%{scala_short_version}-%{scalacheck_version}.jar
 %endif # want_scalacheck
 
-Source16:	https://raw.github.com/willb/climbing-nemesis/master/climbing-nemesis.py
-Source17:	https://raw.github.com/willb/rpm-packaging/master/sbt-packaging/sbt.boot.properties
-Source15:	https://raw.github.com/willb/rpm-packaging/master/sbt-packaging/rpmbuild-sbt.boot.properties
+Source5:	https://raw.github.com/willb/climbing-nemesis/master/climbing-nemesis.py
+Source6:	https://raw.github.com/willb/rpm-packaging/master/sbt-packaging/rpmbuild-sbt.boot.properties
+Source7:	https://raw.github.com/willb/rpm-packaging/master/sbt-packaging/sbt.boot.properties
 
 # sbt script (to be obsoleted in future releases)
-Source21:	https://raw.github.com/willb/rpm-packaging/master/sbt-packaging/sbt
+Source8:	https://raw.github.com/willb/rpm-packaging/master/sbt-packaging/sbt
 
 Source34:	compiler-interface-%{sbt_bootstrap_version}-sources.jar
 Source134:	%sbt_ivy_descriptor compiler-interface
@@ -219,6 +213,11 @@ Source79:	https://oss.sonatype.org/content/repositories/releases/org/specs2/spec
 Source97:	template-resolver-%{template_resolver_version}.jar
 Source197:	template-resolver-%{template_resolver_version}-ivy.xml
 
+%if %{?want_sxr}
+Source77:	http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt.sxr/sxr_%{scala_short_version}/%{sxr_version}/jars/sxr_%{scala_short_version}.jar
+Source450:	sxr_2.10-0.3.0-ivy.xml
+%endif # want_sxr
+
 %if %{do_bootstrap}
 # include bootstrap libraries
 Source35:	%sbt_ivy_artifact compiler-interface
@@ -239,11 +238,6 @@ Source175:	http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/com.typesafe.s
 Source76:	http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/com.typesafe.sbt/sbt-git/scala_%{scala_short_version}/sbt_%{sbt_short_version}/%{sbt_git_version}/jars/sbt-git.jar
 Source176:	http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/com.typesafe.sbt/sbt-git/scala_%{scala_short_version}/sbt_%{sbt_short_version}/%{sbt_git_version}/ivys/ivy.xml#/sbt-git-%{sbt_bootstrap_version}-ivy.xml
 %endif # do_proper
-
-%if %{?want_sxr}
-# sxr
-Source77:	http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt.sxr/sxr_%{scala_short_version}/%{sxr_version}/jars/sxr_%{scala_short_version}.jar
-%endif # want_sxr
 
 %if %{?want_dispatch_http}
 # dispatch-http
@@ -298,20 +292,22 @@ Source370:  jawn-parser_2.10-0.6.0-ivy.xml
 Source371:  jawn-parser_2.10-0.6.0.jar
 Source400:	json4s-support_2.10-0.6.0-ivy.xml
 Source401:	json4s-support_2.10-0.6.0.jar
+Source510:	guava-18.0-ivy.xml
+Source630:	javax.inject-1-ivy.xml
+Source540:	org.eclipse.sisu.plexus-0.3.0.M1-ivy.xml
+Source480:	aether-impl-1.0.1.v20141111-ivy.xml
+Source470:	aether-connector-basic-1.0.1.v20141111-ivy.xml
+Source520:	maven-aether-provider-3.2.3-ivy.xml
+Source521:	maven-aether-provider-3.2.3.jar
 
 %if %{do_bootstrap}
 Source460:	ivy-%{sbt_bootstrap_ivy_version}-ivy.xml
-Source450:	sxr_2.10-0.3.0-ivy.xml
+%endif # do_bootstrap
+
 Source461:	aether-api-1.0.1.v20141111-ivy.xml
-Source470:	aether-connector-basic-1.0.1.v20141111-ivy.xml
-Source480:	aether-impl-1.0.1.v20141111-ivy.xml
 Source490:	aether-spi-1.0.1.v20141111-ivy.xml
 Source500:	aether-util-1.0.1.v20141111-ivy.xml
-Source510:	guava-18.0-ivy.xml
-Source520:	maven-aether-provider-3.2.3-ivy.xml
-Source521:	maven-aether-provider-3.2.3.jar
 Source530:	org.eclipse.sisu.inject-0.3.0.M1-ivy.xml
-Source540:	org.eclipse.sisu.plexus-0.3.0.M1-ivy.xml
 Source550:	maven-model-3.2.3-ivy.xml
 Source560:	maven-model-builder-3.2.3-ivy.xml
 Source561:	maven-model-builder-3.2.3.jar
@@ -322,15 +318,13 @@ Source590:	plexus-component-annotations-1.5.5-ivy.xml
 Source600:	plexus-interpolation-1.19-ivy.xml
 Source610:	plexus-utils-2.1-ivy.xml
 Source620:	plexus-utils-3.0.17-ivy.xml
-Source630:	javax.inject-1-ivy.xml
-%endif # do_bootstrap
 
 Source640:	%generic_ivy_artifact %typesafe_repo org.scala-sbt main %sbt_version main %sbt_version
 Source641:	%generic_ivy_descriptor %typesafe_repo org.scala-sbt main %sbt_version main %sbt_version
 
 
-Source650:  https://oss.sonatype.org/service/local/repositories/releases/content/org/scala-sbt/sbt-giter8-resolver/sbt-giter8-resolver_2.10/0.1.0/sbt-giter8-resolver_2.10-0.1.0.jar
-Source660:  https://oss.sonatype.org/service/local/repositories/releases/content/org/foundweekends/giter8/giter8_2.10/0.7.1/giter8_2.10-0.7.1.jar
+#Source650:  https://oss.sonatype.org/service/local/repositories/releases/content/org/scala-sbt/sbt-giter8-resolver/sbt-giter8-resolver_2.10/0.1.0/sbt-giter8-resolver_2.10-0.1.0.jar
+#Source660:  https://oss.sonatype.org/service/local/repositories/releases/content/org/foundweekends/giter8/giter8_2.10/0.7.1/giter8_2.10-0.7.1.jar
 
 BuildRequires:	java-devel
 BuildRequires:	python
@@ -416,10 +410,10 @@ tar xvzf %{SOURCE200} --strip-components=1 launcher-%{sbt_launcher_version}/laun
 
 sed -i -e '/% "test"/d' project/Util.scala
 
-cp %{SOURCE15} .
-cp %{SOURCE17} .
+cp %{SOURCE6} .
+cp %{SOURCE7} .
 
-cp %{SOURCE16} .
+cp %{SOURCE5} .
 chmod 755 climbing-nemesis.py
 
 mkdir %{ivy_local_dir}
@@ -428,14 +422,14 @@ mkdir %{ivy_local_dir}
 cp %{SOURCE63} .
 %endif
 
+cp %{SOURCE171} org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
+sed -i -e '/precompiled/d' org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
+
 ./climbing-nemesis.py org.scala-lang scala-library %{ivy_local_dir} --version %{scala_version}
 ./climbing-nemesis.py org.scala-lang scala-compiler %{ivy_local_dir} --version %{scala_version}
 ./climbing-nemesis.py org.scala-lang scala-reflect %{ivy_local_dir} --version %{scala_version}
 
-cp %{SOURCE171} org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
-sed -i -e '/precompiled/d' org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
 ./climbing-nemesis.py --jarfile %{SOURCE71} --ivyfile org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml org.scala-sbt sbt %{ivy_local_dir} --version %{sbt_bootstrap_version}
-
 ./climbing-nemesis.py --jarfile %{SOURCE34} --ivyfile %{SOURCE134} org.scala-sbt compiler-interface %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE57} --ivyfile %{SOURCE157} org.scala-sbt main %{ivy_local_dir} --version %{sbt_bootstrap_version}
 ./climbing-nemesis.py --jarfile %{SOURCE640} --ivyfile %{SOURCE641} org.scala-sbt main %{ivy_local_dir} --version %{sbt_version}
@@ -510,45 +504,43 @@ sed -i -e '/precompiled/d' org.scala-sbt.sbt-%{sbt_bootstrap_version}.ivy.xml
 
 # scalacheck
 %if %{?want_scalacheck}
-./climbing-nemesis.py --jarfile %{SOURCE6} org.scalacheck scalacheck %{ivy_local_dir} --version %{scalacheck_version} --scala %{scala_short_version}
-%endif
+./climbing-nemesis.py --jarfile %{SOURCE4} org.scalacheck scalacheck %{ivy_local_dir} --version %{scalacheck_version} --scala %{scala_short_version}
+%endif # want_scalacheck
 
 ./climbing-nemesis.py --jarfile %{SOURCE97} --ivyfile %{SOURCE197} org.scala-sbt template-resolver %{ivy_local_dir} --version %{template_resolver_version}
 ./climbing-nemesis.py --jarfile %{SOURCE49} --ivyfile %{SOURCE149} org.scala-sbt apply-macro %{ivy_local_dir} --version %{sbt_bootstrap_version}
 
-# Giter8 dependencies
-./climbing-nemesis.py org.scala-sbt.sbt-giter8-resolver sbt-giter8-resolver_2.10 %{ivy_local_dir} --version 0.1.0 --jarfile %{SOURCE650}
-./climbing-nemesis.py org.foundweekends.giter8 giter8_2.10 %{ivy_local_dir} --version 0.7.1 --jarfile %{SOURCE660}
-
-%if %{do_bootstrap}
-./climbing-nemesis.py --jarfile %{SOURCE51} --ivyfile %{SOURCE151} org.scala-sbt interface %{ivy_local_dir} --version %{sbt_bootstrap_version}
-./climbing-nemesis.py --jarfile %{SOURCE70} --ivyfile %{SOURCE170} org.scala-sbt io %{ivy_local_dir} --version %{sbt_bootstrap_version}
-./climbing-nemesis.py com.jcraft jsch %{ivy_local_dir} --version 0.1.46 --jarfile %{_sourcedir}/jsch-0.1.46.jar
 ./climbing-nemesis.py org.codehaus.plexus plexus-component-annotations %{ivy_local_dir} --version 1.5.5 --jarfile %{_javadir}/plexus-containers/plexus-component-annotations.jar --ivyfile %{SOURCE590}
 ./climbing-nemesis.py org.codehaus.plexus plexus-classworlds %{ivy_local_dir} --version 2.5.1 --jarfile %{_javadir}/plexus-classworlds.jar --ivyfile %{SOURCE580}
 ./climbing-nemesis.py org.codehaus.plexus plexus-utils %{ivy_local_dir} --version 2.1 --jarfile %{_javadir}/plexus/utils.jar --ivyfile %{SOURCE610}
-./climbing-nemesis.py org.codehaus.plexus plexus-utils %{ivy_local_dir} --version 3.0.17 --jarfile %{_javadir}/plexus/utils.jar --ivyfile %{SOURCE620}
 ./climbing-nemesis.py org.eclipse.aether aether-api %{ivy_local_dir} --version 1.0.1.v20141111 --jarfile %{_javadir}/aether/aether-api.jar --ivyfile %{SOURCE461}
 ./climbing-nemesis.py org.eclipse.aether aether-spi %{ivy_local_dir} --version 1.0.1.v20141111 --jarfile %{_javadir}/aether/aether-spi.jar --ivyfile %{SOURCE490}
 ./climbing-nemesis.py org.eclipse.aether aether-util %{ivy_local_dir} --version 1.0.1.v20141111 --jarfile %{_javadir}/aether/aether-util.jar --ivyfile %{SOURCE500}
 ./climbing-nemesis.py org.apache.maven maven-model %{ivy_local_dir}  --version 3.2.3 --jarfile %{_javadir}/maven/maven-model-2.0.2.jar --ivyfile %{SOURCE550}
 ./climbing-nemesis.py org.apache.maven maven-model-builder %{ivy_local_dir} --version 3.2.3 --jarfile %{SOURCE561} --ivyfile %{SOURCE560}
 ./climbing-nemesis.py org.apache.maven maven-repository-metadata %{ivy_local_dir} --version 3.2.3 --jarfile %{SOURCE571} --ivyfile %{SOURCE570}
-./climbing-nemesis.py org.eclipse.sisu org.eclipse.sisu.inject %{ivy_local_dir} --version 0.3.0.M1 --jarfile %{_javadir}/org.eclipse.sisu.inject.jar --ivyfile %{SOURCE530}
+./climbing-nemesis.py org.codehaus.plexus plexus-utils %{ivy_local_dir} --version 3.0.17 --jarfile %{_javadir}/plexus/utils.jar --ivyfile %{SOURCE620}
 ./climbing-nemesis.py org.codehaus.plexus plexus-interpolation %{ivy_local_dir} --version 1.19 --jarfile %{_javadir}/plexus/interpolation.jar --ivyfile %{SOURCE600}
+./climbing-nemesis.py org.eclipse.sisu org.eclipse.sisu.inject %{ivy_local_dir} --version 0.3.0.M1 --jarfile %{_javadir}/org.eclipse.sisu.inject.jar --ivyfile %{SOURCE530}
+
+%if %{do_bootstrap}
+./climbing-nemesis.py --jarfile %{SOURCE51} --ivyfile %{SOURCE151} org.scala-sbt interface %{ivy_local_dir} --version %{sbt_bootstrap_version}
+./climbing-nemesis.py --jarfile %{SOURCE70} --ivyfile %{SOURCE170} org.scala-sbt io %{ivy_local_dir} --version %{sbt_bootstrap_version}
+./climbing-nemesis.py com.jcraft jsch %{ivy_local_dir} --version 0.1.46 --jarfile %{_sourcedir}/jsch-0.1.46.jar
 ./climbing-nemesis.py org.scala-sbt.ivy ivy %{ivy_local_dir} --version %{sbt_bootstrap_ivy_version} --jarfile %{SOURCE99} --ivyfile %{SOURCE460}
-./climbing-nemesis.py org.eclipse.aether aether-impl %{ivy_local_dir} --version 1.0.1.v20141111 --jarfile %{_javadir}/aether/aether-impl.jar --ivyfile %{SOURCE480}
-./climbing-nemesis.py com.google.guava guava %{ivy_local_dir} --version 18.0 --jarfile %{_javadir}/guava.jar --ivyfile %{SOURCE510}
-./climbing-nemesis.py javax.inject javax.inject %{ivy_local_dir} --version 1 --jarfile %{_javadir}/javax.inject/atinject.jar --ivyfile %{SOURCE630}
-./climbing-nemesis.py org.eclipse.sisu org.eclipse.sisu.plexus %{ivy_local_dir} --version 0.3.0.M1 --jarfile %{_javadir}/org.eclipse.sisu.plexus.jar --ivyfile %{SOURCE540}
-./climbing-nemesis.py org.eclipse.aether aether-connector-basic %{ivy_local_dir} --version 1.0.1.v20141111 --jarfile %{_javadir}/aether/aether-connector-basic.jar --ivyfile %{SOURCE470}
-./climbing-nemesis.py org.apache.maven maven-aether-provider %{ivy_local_dir} --version 3.2.3 --jarfile %{SOURCE521} --ivyfile %{SOURCE520}
+%endif # do_bootstrap
 
 %if %{?want_sxr}
 ./climbing-nemesis.py --jarfile %{SOURCE77} --ivyfile %{SOURCE450} org.scala-sbt.sxr sxr_2.10 %{ivy_local_dir} --version %{sxr_version}
+./climbing-nemesis.py --jarfile %{SOURCE77} --ivyfile %{SOURCE450} org.scala-sbt sxr_2.10 %{ivy_local_dir} --version %{sxr_version}
 %endif # want_sxr
 
-%endif # do_bootstrap
+./climbing-nemesis.py com.google.guava guava %{ivy_local_dir} --version 18.0 --jarfile %{_javadir}/guava.jar --ivyfile %{SOURCE510}
+./climbing-nemesis.py javax.inject javax.inject %{ivy_local_dir} --version 1 --jarfile %{_javadir}/javax.inject/atinject.jar --ivyfile %{SOURCE630}
+./climbing-nemesis.py org.eclipse.sisu org.eclipse.sisu.plexus %{ivy_local_dir} --version 0.3.0.M1 --jarfile %{_javadir}/org.eclipse.sisu.plexus.jar --ivyfile %{SOURCE540}
+./climbing-nemesis.py org.eclipse.aether aether-impl %{ivy_local_dir} --version 1.0.1.v20141111 --jarfile %{_javadir}/aether/aether-impl.jar --ivyfile %{SOURCE480}
+./climbing-nemesis.py org.eclipse.aether aether-connector-basic %{ivy_local_dir} --version 1.0.1.v20141111 --jarfile %{_javadir}/aether/aether-connector-basic.jar --ivyfile %{SOURCE470}
+./climbing-nemesis.py org.apache.maven maven-aether-provider %{ivy_local_dir} --version 3.2.3 --jarfile %{SOURCE521} --ivyfile %{SOURCE520}
 
 %if %{do_proper}
 ./climbing-nemesis.py --jarfile %{SOURCE74} --ivyfile %{SOURCE174} com.typesafe.sbt sbt-ghpages %{ivy_local_dir} --version %{sbt_ghpages_version}
@@ -581,9 +573,11 @@ sed -i -e '/sbt-scalariform/d' project/plugins.sbt
 sed -i -e '/sbt-site/d' project/plugins.sbt
 sed -i -e '/bintray-sbt/d' project/plugins.sbt
 sed -i -e '/sbt-assembly/d' project/plugins.sbt
-cat project/plugins.sbt
-rm -f main/src/main/src/main/scala/sbt/plugin/Giter8ResolverPlugin.scala
-sed -i '/Giter8/s/^/\/\//g' main/src/main/scala/sbt/PluginDiscovery.scala 
+rm -f main/src/main/scala/sbt/plugins/Giter8ResolverPlugin.scala
+sed -i '/sbt.plugins.Giter8TemplatePlugin/d' main/src/main/scala/sbt/PluginDiscovery.scala 
+sed -i 's/sbt.plugins.JUnitXmlReportPlugin,/sbt.plugins.JUnitXmlReportPlugin/' main/src/main/scala/sbt/PluginDiscovery.scala
+#sed -i "/templateResolverApi/d" project/Dependencies.scala 
+#sed -i "/templateResolverApi/d" build.sbt
 %endif
 
 for props in rpmbuild-sbt.boot.properties sbt.boot.properties ; do
@@ -657,7 +651,7 @@ mkdir -p %{buildroot}/%{_javadir}/%{name}
 find published -name \*.jar | grep -v sbt-launch.jar | grep %{sbt_full_version}.jar | xargs -I JAR cp JAR %{buildroot}/%{_javadir}/%{name}
 
 mkdir -p %{buildroot}/%{_bindir}
-cp -p %{SOURCE21} %{buildroot}/%{_bindir}/%{name}
+cp -p %{SOURCE8} %{buildroot}/%{_bindir}/%{name}
 chmod 755 %{buildroot}/%{_bindir}/%{name}
 
 pushd %{buildroot}/%{_javadir}/%{name}
@@ -670,15 +664,12 @@ popd
 # manually install BUNDLED launcher
 cp launcher-implementation/target/launcher-implementation-%{sbt_full_version}.jar %{buildroot}/%{_javadir}/%{name}/launcher-implementation.jar
 cp launcher-interface/target/launcher-interface-%{sbt_full_version}.jar %{buildroot}/%{_javadir}/%{name}/launcher-interface.jar
+%endif
 
 # manually install BUNDLED pickling/serialization/quasiquotes
 find sbt-boot-dir -name \*.jar | grep scala-pickling | xargs -I JAR cp JAR %{buildroot}/%{_javadir}/%{name}/scala-pickling.jar
 find sbt-boot-dir -name \*.jar | grep serialization | xargs -I JAR cp JAR %{buildroot}/%{_javadir}/%{name}/serialization.jar
 find sbt-boot-dir -name \*.jar | grep quasiquotes | xargs -I JAR cp JAR %{buildroot}/%{_javadir}/%{name}/quasiquotes.jar
-
-# manually install sbt-giter8-resolver
-cp %{ivy_local_dir}/org.scala-sbt.sbt-giter8-resolver/sbt-giter8-resolver/0.1.0/sbt-giter8-resolver-0.1.0.jar %{buildroot}%{_javadir}/%{name}/sbt-giter8-resolver.jar
-%endif
 
 rm -f %{buildroot}/%{_javadir}/%{name}/sbt-launch.jar
 
@@ -753,15 +744,14 @@ done
 %{_javadir}/%{name}/quasiquotes.jar
 %{_javadir}/%{name}/scala-pickling.jar
 %{_javadir}/%{name}/serialization.jar
-%{_javadir}/%{name}/sbt-giter8-resolver.jar
-
 %{_sysconfdir}/%{name}
+
 %doc README.md LICENSE NOTICE
 
 %changelog
 * Fri Nov 03 2017 Ricardo Martinelli <rmartine@redhat.com> - 0.13.13-2
 - Bootstrap build improved
-- Added giter8 support
+- Removed experimental giter8 support
 
 * Fri Sep 01 2017 Pete MacKinnon <pmackinn@redhat.com> - 0.13.13-1
 - Bootstrap build
